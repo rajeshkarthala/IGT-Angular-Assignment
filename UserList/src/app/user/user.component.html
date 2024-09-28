@@ -1,7 +1,7 @@
 <div class="table-responsive">
     <mat-form-field>
         <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. Mia" #input>
+        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. abc" #input>
     </mat-form-field>
     <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
 
@@ -37,4 +37,5 @@
             <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
         </tr>
     </table>
+    <button mat-raised-button (click)="loadMore()">Show More</button>
 </div>
