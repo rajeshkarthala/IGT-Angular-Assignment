@@ -13,7 +13,6 @@ export class UserSharedService {
 
   setDataSource(dataSource: MatTableDataSource<User> | null) {
     if(!!dataSource){
-    // Create a new instance of CustomMatTableDataSource with the data from the original dataSource
     this.dataSource = new CustomMatTableDataSource<User>([...dataSource.data]);
     this.dataSource.sort = dataSource.sort;
     this.dataSource.filter = dataSource.filter;
@@ -32,5 +31,4 @@ export class UserSharedService {
 
 }
 class CustomMatTableDataSource<T> extends MatTableDataSource<T> {
-  // Add any additional properties or methods if needed
 }
