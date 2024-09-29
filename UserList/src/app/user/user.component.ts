@@ -1,5 +1,5 @@
-import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
-import { MatSort } from '@angular/material/sort';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { MatSort, Sort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule } from '@angular/common/http';
@@ -32,7 +32,7 @@ import { UserSharedService } from '../shared/services/user-shared-service';
     MatProgressSpinnerModule
   ]
 })
-export class UserComponent implements OnInit, AfterViewInit {
+export class UserComponent implements OnInit {
   users: User[] = [];
   displayedColumns: string[] = ['id', 'name', 'email', 'status'];
   dataSource: MatTableDataSource<User> = new MatTableDataSource(this.users);
@@ -50,10 +50,6 @@ export class UserComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
       this.previousState = this.userSharedService.getDataSource();
       this.fetchUsers();
-  }
-
-  ngAfterViewInit(): void {
-    this.dataSource.sort = this.sort;    
   }
 
   fetchUsers(): void {
@@ -76,11 +72,18 @@ export class UserComponent implements OnInit, AfterViewInit {
     if(!!this.previousState) {
       this.dataSource = this.previousState;
       this.currentPage = Math.floor(this.dataSource.data.length / this.pageSize);
-      this.sort = this.dataSource.sort!;
+      this.dataSource.sort = this.previousState.sort;
+      if(!!this.dataSource.filter){
       this.input.nativeElement.value = this.dataSource.filter;
+      }
     }else{
       this.loadMore();
     }
+  }
+
+  sortData(sort: Sort) {
+    this.dataSource.sort = this.sort;
+    this.userSharedService.setDataSource(this.dataSource);
   }
 
   loadMore() {
@@ -91,6 +94,7 @@ export class UserComponent implements OnInit, AfterViewInit {
       const nextPageData = userListData
         .slice(this.currentPage * this.pageSize, (this.currentPage + 1) * this.pageSize);
       this.dataSource.data = this.dataSource.data.concat(nextPageData);
+      this.dataSource.sort = this.sort;
       this.currentPage++;
       this.userSharedService.setDataSource(this.dataSource);
     }

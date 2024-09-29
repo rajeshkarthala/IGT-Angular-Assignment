@@ -1,9 +1,9 @@
 <div class="table-responsive">
-    <mat-form-field>
+    <mat-form-field class="filter-container">
         <mat-label>Filter</mat-label>
-        <input matInput (keyup)="applyFilter($event)" placeholder="Ex. abc" #input>
+        <input matInput class="filter-input" (keyup)="applyFilter($event)" placeholder="Ex. abc" #input>
     </mat-form-field>
-    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8">
+    <table mat-table [dataSource]="dataSource" matSort (matSortChange)="sortData($event)" class="mat-elevation-z8">
 
         <!-- ID Column -->
         <ng-container matColumnDef="id">
@@ -42,5 +42,7 @@
             <td class="mat-cell" *ngIf="!isLoading" colspan="4">No data matching the filter "{{input.value}}"</td>
         </tr>
     </table>
-    <button mat-raised-button [ngClass]="{'max-records-reached': maxRecordsReached}" (click)="loadMore()">Show More</button>
+    <div class="show-more-container">
+    <button class="show-more-button" mat-raised-button [ngClass]="{'max-records-reached': maxRecordsReached}" (click)="loadMore()">Show More</button>
+    </div>
 </div>
