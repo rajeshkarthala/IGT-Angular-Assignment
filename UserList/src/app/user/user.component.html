@@ -30,12 +30,14 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        
+        <tr mat-row  (click)="navigateToUser(row.id)" 
+        *matRowDef="let row; columns: displayedColumns;"></tr>
 
         <!-- Row shown when there is no matching data. -->
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
         </tr>
     </table>
-    <button mat-raised-button (click)="loadMore()">Show More</button>
+    <button mat-raised-button [ngClass]="{'max-records-reached': maxRecordsReached}" (click)="loadMore()">Show More</button>
 </div>

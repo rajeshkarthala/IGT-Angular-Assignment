@@ -1,1 +1,12 @@
-<p>user-list works!</p>
+<mat-card>
+    <mat-card-title>User List</mat-card-title>
+    <mat-card-content>
+        <div *ngFor="let user of selectedUser">
+            <mat-card><strong>User ID: </strong>{{user?.id}}</mat-card>
+            <mat-card><strong>User Name: </strong>{{user?.name}}</mat-card>
+            <mat-card><strong>User Email: </strong>{{user?.email}}</mat-card>
+            <mat-card><strong>User Status: </strong>{{user?.status}}</mat-card>
+        </div>
+    </mat-card-content>
+    <mat-card-footer><button mat-raised-button (click)="navigateBack()">Back</button></mat-card-footer>
+</mat-card>

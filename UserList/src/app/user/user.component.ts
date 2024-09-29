@@ -1,50 +1,106 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { AfterViewInit, Component, OnInit, ViewChild } from '@angular/core';
 import { MatSort } from '@angular/material/sort';
 import { MatTableDataSource } from '@angular/material/table';
+import { CommonModule } from '@angular/common';
+import { HttpClientModule } from '@angular/common/http';
+import { MatTableModule } from '@angular/material/table';
+import { MatSortModule } from '@angular/material/sort';
+import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+import { UserService } from './user.service';
+import { User } from '../shared/models/user.model';
+import { Router } from '@angular/router';
+import { UserSharedService } from '../shared/services/user-shared-service';
+
 
 @Component({
   selector: 'app-user',
   templateUrl: './user.component.html',
-  styleUrls: ['./user.component.scss']
+  styleUrls: ['./user.component.scss'],
+  standalone: true,
+  providers:[UserService],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    MatTableModule,
+    MatSortModule,
+    MatInputModule,
+    FormsModule
+  ]
 })
-export class UserComponent implements OnInit {
-
-  users: any[] = [];
+export class UserComponent implements OnInit, AfterViewInit {
+  users: User[] = [];
   displayedColumns: string[] = ['id', 'name', 'email', 'status'];
-  dataSource: MatTableDataSource<any> = new MatTableDataSource(this.users);
-  @ViewChild(MatSort, {static: false}) sort!: MatSort;
+  dataSource: MatTableDataSource<User> = new MatTableDataSource(this.users);
+  @ViewChild(MatSort, { static: false }) sort!: MatSort;
   pageSize = 3;
   currentPage = 0;
-
   @ViewChild('input') input: any;
+  previousState: any;
+  maxRecordsReached: boolean = false;
+  private destroy$ = new Subject<void>();
 
-  constructor(private http: HttpClient) { }
+  constructor(private userService: UserService,private userSharedService: UserSharedService, private router: Router) {}
 
   ngOnInit(): void {
-    this.fetchUsers();
+      this.previousState = this.userSharedService.getDataSource();
+      this.fetchUsers();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.sort = this.sort;    
   }
 
   fetchUsers(): void {
-    this.http.get('https://gorest.co.in/public-api/users')
-      .subscribe((response: any) => {
-        this.users = response.data;
-        this.loadMore();
-        this.dataSource.sort = this.sort;
-      }, error => {
-        console.error('Error fetching users:', error);
+    this.userService.getUsers()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: any) => {
+          this.users = response.data;
+          this.loadTableData();
+        },
+        error: (e) => console.error("Error fetching users:", e),
+        complete: () => console.info('complete')
       });
   }
 
+  loadTableData(){
+    if(!!this.previousState) {
+      this.dataSource = this.previousState;
+      this.currentPage = Math.floor(this.dataSource.data.length / this.pageSize);
+      this.sort = this.dataSource.sort!;
+      this.input.nativeElement.value = this.dataSource.filter;
+    }else{
+      this.loadMore();
+    }
+  }
+
   loadMore() {
-    const nextPageData = this.users
-      .slice(this.currentPage * this.pageSize, (this.currentPage + 1) * this.pageSize);
-    this.dataSource.data = this.dataSource.data.concat(nextPageData);
-    this.currentPage++;
+    if (this.currentPage * this.pageSize >= this.users.length) {
+      this.maxRecordsReached = true;
+    } else {
+      let userListData = [...this.users];
+      const nextPageData = userListData
+        .slice(this.currentPage * this.pageSize, (this.currentPage + 1) * this.pageSize);
+      this.dataSource.data = this.dataSource.data.concat(nextPageData);
+      this.currentPage++;
+      this.userSharedService.setDataSource(this.dataSource);
+    }
   }
 
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.dataSource.filter = filterValue.trim().toLowerCase();
+    this.userSharedService.setDataSource(this.dataSource);
+  }
+
+  navigateToUser(userId: number): void {
+    this.router.navigate(['/user', userId]);
+  }
+
+  ngOnDestroy() {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
