@@ -8,9 +8,11 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatInputModule } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { Router } from '@angular/router';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 import { UserService } from './user.service';
 import { User } from '../shared/models/user.model';
-import { Router } from '@angular/router';
 import { UserSharedService } from '../shared/services/user-shared-service';
 
 
@@ -26,7 +28,8 @@ import { UserSharedService } from '../shared/services/user-shared-service';
     MatTableModule,
     MatSortModule,
     MatInputModule,
-    FormsModule
+    FormsModule,
+    MatProgressSpinnerModule
   ]
 })
 export class UserComponent implements OnInit, AfterViewInit {
@@ -39,6 +42,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   @ViewChild('input') input: any;
   previousState: any;
   maxRecordsReached: boolean = false;
+  isLoading: boolean = false;
   private destroy$ = new Subject<void>();
 
   constructor(private userService: UserService,private userSharedService: UserSharedService, private router: Router) {}
@@ -53,6 +57,7 @@ export class UserComponent implements OnInit, AfterViewInit {
   }
 
   fetchUsers(): void {
+    this.isLoading = true;
     this.userService.getUsers()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -61,7 +66,9 @@ export class UserComponent implements OnInit, AfterViewInit {
           this.loadTableData();
         },
         error: (e) => console.error("Error fetching users:", e),
-        complete: () => console.info('complete')
+        complete: () => {
+          this.isLoading = false;
+          console.info('complete')}
       });
   }
 

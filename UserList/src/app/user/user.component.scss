@@ -23,11 +23,15 @@
     border-color: currentColor;
   }
 
-  
-.max-records-reached {
- opacity: 0.5;
- pointer-events: none;
-}
+  .spinner-container {
+    justify-content: center;
+    align-items: center;
+  }
+
+    .max-records-reached {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   
   
   @media (max-width: 600px) {

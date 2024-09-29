@@ -36,7 +36,10 @@
 
         <!-- Row shown when there is no matching data. -->
         <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="4">No data matching the filter "{{input.value}}"</td>
+            <td class="mat-cell spinner-container" colspan="12" *ngIf="isLoading">
+                <mat-spinner></mat-spinner>
+            </td>
+            <td class="mat-cell" *ngIf="!isLoading" colspan="4">No data matching the filter "{{input.value}}"</td>
         </tr>
     </table>
     <button mat-raised-button [ngClass]="{'max-records-reached': maxRecordsReached}" (click)="loadMore()">Show More</button>
