@@ -71,7 +71,7 @@ export class UserComponent implements OnInit {
   loadTableData(){
     if(!!this.previousState) {
       this.dataSource = this.previousState;
-      this.currentPage = Math.floor(this.dataSource.data.length / this.pageSize);
+      this.currentPage = Math.ceil(this.dataSource.data.length / this.pageSize);
       this.dataSource.sort = this.previousState.sort;
       if(!!this.dataSource.filter){
       this.input.nativeElement.value = this.dataSource.filter;
@@ -93,7 +93,15 @@ export class UserComponent implements OnInit {
       let userListData = [...this.users];
       const nextPageData = userListData
         .slice(this.currentPage * this.pageSize, (this.currentPage + 1) * this.pageSize);
-      this.dataSource.data = this.dataSource.data.concat(nextPageData);
+  
+      // Create a Set to track unique user IDs
+      const existingUserIds = new Set(this.dataSource.data.map(user => user.id));
+  
+      // Filter out duplicates
+      const uniqueNextPageData = nextPageData.filter(user => !existingUserIds.has(user.id));
+  
+      // Add unique users to the dataSource
+      this.dataSource.data = this.dataSource.data.concat(uniqueNextPageData);
       this.dataSource.sort = this.sort;
       this.currentPage++;
       this.userSharedService.setDataSource(this.dataSource);
